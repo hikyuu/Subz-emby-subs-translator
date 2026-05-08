@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using SubZ.Plugin.Configuration;
 
 namespace SubZ.Plugin.Services;
@@ -244,6 +245,8 @@ public static class SubtitleSourceResolver
 
     private static int RunProcess(string fileName, string args, out string output)
     {
+        const int timeoutMs = 180000;
+
         var psi = new ProcessStartInfo
         {
             FileName = fileName,
@@ -257,9 +260,29 @@ public static class SubtitleSourceResolver
         using (var proc = new Process { StartInfo = psi })
         {
             proc.Start();
-            var stdOut = proc.StandardOutput.ReadToEnd();
-            var stdErr = proc.StandardError.ReadToEnd();
-            proc.WaitForExit();
+
+            var stdOutTask = proc.StandardOutput.ReadToEndAsync();
+            var stdErrTask = proc.StandardError.ReadToEndAsync();
+
+            if (!proc.WaitForExit(timeoutMs))
+            {
+                try
+                {
+                    proc.Kill();
+                }
+                catch
+                {
+                    // best effort
+                }
+
+                Task.WaitAll(new Task[] { stdOutTask, stdErrTask }, 5000);
+                output = "Process timeout after " + timeoutMs.ToString(CultureInfo.InvariantCulture) + " ms.";
+                return -1;
+            }
+
+            Task.WaitAll(new Task[] { stdOutTask, stdErrTask });
+            var stdOut = stdOutTask.Result;
+            var stdErr = stdErrTask.Result;
             output = (stdOut + "\n" + stdErr).Trim();
             return proc.ExitCode;
         }
