@@ -98,68 +98,36 @@ Notes:
 
 ### Configuration Panel Reference
 
-#### Core
-
-| Option | Description |
-|---|---|
-| `Enable plugin` | Global on/off switch. Default: `true`. |
-| `Manual target only mode` | Skip library-ingest auto trigger, run only manual targets. Default: `false`. |
-| `Target language` | Output language code. Default: `zh-CN`. Existing target-language subtitles will be skipped. |
-
-#### Manual Run
-
-| Option | Description |
-|---|---|
-| `Manual target folder` | Folder target for a manual job. Default: empty. Scans recursively. |
-| `Manual target file` | Single file target for a manual job. Default: empty. Use folder or file, not both. |
-| `Run once now` | On save, queue one manual task with current target. Default: `false`. Auto-resets after accepted. |
-
-#### Output
-
-| Option | Description |
-|---|---|
-| `Output format` | `srt` or `ass`. Default: `srt`. |
-| `ASS font name` | ASS font family. Default: `Microsoft YaHei`. Requires font availability in rendering environment. |
-| `ASS font size` | ASS font size. Default: `60`. |
-| `ASS font color` | ASS primary color. Default: `&H00FFFFFF`. Supports `&H00RRGGBB` or `#RRGGBB`. |
-
-#### LLM
-
-| Option | Description |
-|---|---|
-| `API provider` | Provider label for profile behavior. Default: `deepseek`. |
-| `API base URL` | LLM base URL (SubZ calls `/chat/completions`). Default: `https://api.deepseek.com`. |
-| `API key` | LLM API credential. Default: empty. |
-| `Model` | Model ID used in request payload. Default: `deepseek-v4-flash`. |
-| `Batch size` | Subtitle cues per request. Default: `120`. Higher values improve speed but raise timeout/misalignment risk. |
-| `Preferred source language` | Preferred source subtitle language code. Default: `en`. Falls back to any available subtitle. |
-
-#### Media Tools
-
-| Option | Description |
-|---|---|
-| `FFmpeg path` | Subtitle extraction executable path. Default: `/bin/ffmpeg`. |
-| `FFprobe path` | Subtitle probing executable path. Default: `/bin/ffprobe`. |
-
-#### Logging & Status
-
-| Option | Description |
-|---|---|
-| `Log file max size (MB)` | Runtime log rolling size limit. Default: `10`. |
-| `Log retention days` | Runtime log retention. Default: `7`. |
-| `Debug log mode` | Verbose diagnostics (full request/response body and ffprobe/ffmpeg details). Default: `false`. |
-| `Status page URL` | Stored external status page link. Default: `http://localhost:18123/subz-status.html`. |
-
-#### Reliability
-
-| Option | Description |
-|---|---|
-| `Preserve subtitle tags` | Protect and restore tags/placeholders around translation. Default: `true`. |
-| `Enable tail retry` | Self-healing retries for failed/unchanged segments. Default: `true`. |
-| `Tail retry attempts` | Max tail/healing retry rounds. Default: `2`. |
-| `Prefer non-forced track` | Prefer non-forced subtitle tracks. Default: `true`. |
-| `Prefer non-HI track` | Prefer non-hearing-impaired subtitle tracks. Default: `true`. |
-| `Prefer text subtitle track` | Prefer text subtitle tracks over image-based tracks. Default: `true`. |
+| Module | Option | Description |
+|---|---|---|
+| Core | `EnablePlugin` | Global on/off switch. Default: `true`. |
+| Core | `ManualTargetOnlyMode` | Skip library-ingest auto trigger, run only manual targets. Default: `false`. |
+| Core | `TargetLanguage` | Output language code. Default: `zh-CN`. Existing target-language subtitles will be skipped. |
+| Manual Run | `ManualTargetFolder` | Folder target for a manual job. Default: empty. Scans recursively. |
+| Manual Run | `ManualTargetFile` | Single file target for a manual job. Default: empty. Use folder or file, not both. |
+| Manual Run | `RunOnceNow` | On save, queue one manual task with current target. Default: `false`. Auto-resets after accepted. |
+| Output | `OutputFormat` | `srt` or `ass`. Default: `srt`. |
+| Output | `AssFontName` | ASS font family. Default: `Microsoft YaHei`. Requires font availability in rendering environment. |
+| Output | `AssFontSize` | ASS font size. Default: `60`. |
+| Output | `AssFontColor` | ASS primary color. Default: `&H00FFFFFF`. Supports `&H00RRGGBB` or `#RRGGBB`. |
+| LLM | `ApiProvider` | Provider label for profile behavior. Default: `deepseek`. |
+| LLM | `ApiBaseUrl` | LLM base URL (SubZ calls `/chat/completions`). Default: `https://api.deepseek.com`. |
+| LLM | `ApiKey` | LLM API credential. Default: empty. |
+| LLM | `Model` | Model ID used in request payload. Default: `deepseek-v4-flash`. |
+| LLM | `BatchSize` | Subtitle cues per request. Default: `120`. Higher values improve speed but raise timeout/misalignment risk. |
+| LLM | `PreferredSourceLanguage` | Preferred source subtitle language code. Default: `en`. Falls back to any available subtitle. |
+| Media Tools | `FfmpegPath` | Subtitle extraction executable path. Default: `/bin/ffmpeg`. |
+| Media Tools | `FfprobePath` | Subtitle probing executable path. Default: `/bin/ffprobe`. |
+| Logging & Status | `LogFileMaxSizeMb` | Runtime log rolling size limit. Default: `10`. |
+| Logging & Status | `LogRetentionDays` | Runtime log retention. Default: `7`. |
+| Logging & Status | `DebugLogMode` | Verbose diagnostics (full request/response body and ffprobe/ffmpeg details). Default: `false`. |
+| Logging & Status | `StatusPageUrl` | Stored external status page link. Default: `http://localhost:18123/subz-status.html`. |
+| Reliability | `PreserveSubtitleTags` | Protect and restore tags/placeholders around translation. Default: `true`. |
+| Reliability | `EnableTailRetry` | Self-healing retries for failed/unchanged segments. Default: `true`. |
+| Reliability | `TailRetryAttempts` | Max tail/healing retry rounds. Default: `2`. |
+| Reliability | `PreferNonForcedTrack` | Prefer non-forced subtitle tracks. Default: `true`. |
+| Reliability | `PreferNonHiTrack` | Prefer non-hearing-impaired subtitle tracks. Default: `true`. |
+| Reliability | `PreferTextSubtitleTrack` | Prefer text subtitle tracks over image-based tracks. Default: `true`. |
 
 Default API profile:
 
