@@ -274,7 +274,6 @@ define(['emby-button'], function () {
         var completion = Number(usage.CompletionTokens || 0);
         var total = Number(usage.TotalTokens || 0);
         var cues = Number(usage.Cues || 0);
-        var latest = usage.Latest || null;
 
         if (taskCount <= 0) {
             var noDataText = t('noTokenRecords');
@@ -285,7 +284,6 @@ define(['emby-button'], function () {
             }
             tokenUsageEl.innerHTML = '<div class="sz-empty">' + esc(noDataText) + '</div>';
         } else {
-            var latestTime = latest && latest.Timestamp ? fmtTime(latest.Timestamp) : '-';
             var tu = '';
             tu += '<div style="padding:1em;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8em;">';
             tu += '<div class="card" style="background:var(--cardBackground);border:1px solid var(--cardBorderColor,#e5e7eb);border-radius:8px;padding:.8em;"><div style="font-size:.8em;opacity:.7;">' + esc(t('tasks')) + '</div><div style="font-size:1.2em;font-weight:700;">' + esc(String(taskCount)) + '</div></div>';
@@ -293,7 +291,6 @@ define(['emby-button'], function () {
             tu += '<div class="card" style="background:var(--cardBackground);border:1px solid var(--cardBorderColor,#e5e7eb);border-radius:8px;padding:.8em;"><div style="font-size:.8em;opacity:.7;">' + esc(t('completion')) + '</div><div style="font-size:1.2em;font-weight:700;">' + esc(String(completion)) + '</div></div>';
             tu += '<div class="card" style="background:var(--cardBackground);border:1px solid var(--cardBorderColor,#e5e7eb);border-radius:8px;padding:.8em;"><div style="font-size:.8em;opacity:.7;">' + esc(t('total')) + '</div><div style="font-size:1.2em;font-weight:700;">' + esc(String(total)) + '</div></div>';
             tu += '<div class="card" style="background:var(--cardBackground);border:1px solid var(--cardBorderColor,#e5e7eb);border-radius:8px;padding:.8em;"><div style="font-size:.8em;opacity:.7;">' + esc(t('cues')) + '</div><div style="font-size:1.2em;font-weight:700;">' + esc(String(cues)) + '</div></div>';
-            tu += '<div class="card" style="background:var(--cardBackground);border:1px solid var(--cardBorderColor,#e5e7eb);border-radius:8px;padding:.8em;"><div style="font-size:.8em;opacity:.7;">' + esc(t('latest')) + '</div><div style="font-size:.95em;font-weight:600;">' + esc(latestTime) + '</div></div>';
             tu += '</div>';
             tu += '<div class="sz-token-row sz-token-head">'
                 + '<div class="sz-token-time">' + esc(t('time')) + '</div>'
