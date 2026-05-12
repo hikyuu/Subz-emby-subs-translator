@@ -83,8 +83,8 @@ public sealed class SubZEntryPoint : IServerEntryPoint
 
     private static string? ResolveFolderPath(BaseItem item)
     {
-        if (item is Episode episode && episode.Series is not null)
-            return episode.Series.ContainingFolderPath;
+        if (item is Episode)
+            return item.ContainingFolderPath;
 
         if (item is Movie)
             return item.ContainingFolderPath;

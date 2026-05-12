@@ -18,7 +18,6 @@
   <ItemGroup>
     <EmbeddedResource Include="..\..\assets\subz-logo.svg" LogicalName="SubZ.Assets.Logo.subz-logo.svg" />
     <EmbeddedResource Include="..\..\assets\subz-logo-thumb.png" LogicalName="SubZ.Assets.Logo.subz-logo-thumb.png" />
-    <EmbeddedResource Include="UI\StatusDashboard.html" />
     <EmbeddedResource Include="UI\StatusDashboardV2.html" />
     <EmbeddedResource Include="UI\StatusDashboard.js" />
   </ItemGroup>

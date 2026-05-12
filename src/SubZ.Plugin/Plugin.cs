@@ -171,6 +171,26 @@ public sealed class Plugin : BasePluginSimpleUI<PluginOptions>, IHasThumbImage, 
             options.LogRetentionDays = 7;
         }
 
+        if (options.Profiles != null && options.Profiles.Count > 0)
+        {
+            var activeProfile = options.Profiles[0];
+            options.ApiProvider = string.IsNullOrWhiteSpace(activeProfile.Provider)
+                ? options.ApiProvider
+                : activeProfile.Provider;
+            options.ApiBaseUrl = string.IsNullOrWhiteSpace(activeProfile.BaseUrl)
+                ? options.ApiBaseUrl
+                : activeProfile.BaseUrl;
+            options.ApiKey = string.IsNullOrWhiteSpace(activeProfile.ApiKey)
+                ? options.ApiKey
+                : activeProfile.ApiKey;
+            options.Model = string.IsNullOrWhiteSpace(activeProfile.Model)
+                ? options.Model
+                : activeProfile.Model;
+            options.BatchSize = activeProfile.BatchSize > 0
+                ? activeProfile.BatchSize
+                : options.BatchSize;
+        }
+
         return options;
     }
 
@@ -198,6 +218,11 @@ public sealed class Plugin : BasePluginSimpleUI<PluginOptions>, IHasThumbImage, 
             profile.Temperature = 0.1;
         }
         profile.BatchSize = options.BatchSize <= 0 ? 120 : options.BatchSize;
+        options.ApiProvider = profile.Provider;
+        options.ApiBaseUrl = profile.BaseUrl;
+        options.ApiKey = profile.ApiKey;
+        options.Model = profile.Model;
+        options.BatchSize = profile.BatchSize;
         options.PreferredSourceLanguage = SourceLanguageMap.ToCode(options.PreferredSourceLanguageOption);
         options.FfmpegPath = string.IsNullOrWhiteSpace(options.FfmpegPath) ? "/bin/ffmpeg" : options.FfmpegPath.Trim();
         options.FfprobePath = string.IsNullOrWhiteSpace(options.FfprobePath) ? "/bin/ffprobe" : options.FfprobePath.Trim();

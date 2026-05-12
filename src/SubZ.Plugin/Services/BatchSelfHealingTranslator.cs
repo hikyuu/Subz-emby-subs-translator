@@ -488,7 +488,7 @@ public sealed class BatchSelfHealingTranslator
             return string.Empty;
         }
 
-        var raw = (text ?? string.Empty).Replace("\r", " ").Replace("\n", " ").Trim().ToLowerInvariant();
+        var raw = (text ?? string.Empty).Replace("\r", " ").Replace("\n", " ").Trim();
         var compact = new char[raw.Length];
         var pos = 0;
         var prevSpace = false;

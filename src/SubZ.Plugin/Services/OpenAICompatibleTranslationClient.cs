@@ -107,13 +107,29 @@ public sealed class OpenAICompatibleTranslationClient : ISubtitleTranslationClie
         var provider = (profile.Provider ?? string.Empty).Trim();
         var baseUrl = (profile.BaseUrl ?? string.Empty).Trim();
         var model = (profile.Model ?? string.Empty).Trim();
-
-        var isDeepSeek =
-            provider.IndexOf("deepseek", StringComparison.OrdinalIgnoreCase) >= 0
-            || baseUrl.IndexOf("deepseek.com", StringComparison.OrdinalIgnoreCase) >= 0
-            || model.StartsWith("deepseek", StringComparison.OrdinalIgnoreCase);
+        var isDeepSeekProvider = string.Equals(provider, "deepseek", StringComparison.OrdinalIgnoreCase);
+        var isDeepSeekHost = IsDeepSeekHost(baseUrl);
+        var isDeepSeekModel = model.StartsWith("deepseek", StringComparison.OrdinalIgnoreCase);
+        var isDeepSeek = isDeepSeekProvider || (isDeepSeekHost && isDeepSeekModel);
 
         return isDeepSeek ? new ThinkingOption { type = "disabled" } : null;
+    }
+
+    private static bool IsDeepSeekHost(string baseUrl)
+    {
+        if (string.IsNullOrWhiteSpace(baseUrl))
+        {
+            return false;
+        }
+
+        if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri))
+        {
+            return false;
+        }
+
+        var host = uri.Host ?? string.Empty;
+        return host.Equals("api.deepseek.com", StringComparison.OrdinalIgnoreCase)
+            || host.EndsWith(".deepseek.com", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string BuildThinkingCacheKey(string baseUrl, string model)

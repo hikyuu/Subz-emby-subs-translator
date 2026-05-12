@@ -79,20 +79,45 @@ public static class SubtitleSourceResolver
         }
 
         var preferredSource = NormalizeLanguageCode(options.PreferredSourceLanguage, "en");
-        var hit = candidates.FirstOrDefault(f => f.IndexOf("." + preferredSource + ".", StringComparison.OrdinalIgnoreCase) >= 0);
+        var hit = candidates.FirstOrDefault(f => HasLanguageToken(f, stem, preferredSource));
         if (!string.IsNullOrWhiteSpace(hit))
         {
             return hit;
         }
 
         var shortCode = preferredSource.Split('-')[0];
-        hit = candidates.FirstOrDefault(f => f.IndexOf("." + shortCode + ".", StringComparison.OrdinalIgnoreCase) >= 0);
+        hit = candidates.FirstOrDefault(f => HasLanguageToken(f, stem, shortCode));
         if (!string.IsNullOrWhiteSpace(hit))
         {
             return hit;
         }
 
         return candidates[0];
+    }
+
+    private static bool HasLanguageToken(string subtitlePath, string videoStem, string languageCode)
+    {
+        if (string.IsNullOrWhiteSpace(subtitlePath)
+            || string.IsNullOrWhiteSpace(videoStem)
+            || string.IsNullOrWhiteSpace(languageCode))
+        {
+            return false;
+        }
+
+        var fileStem = Path.GetFileNameWithoutExtension(subtitlePath) ?? string.Empty;
+        if (!fileStem.StartsWith(videoStem, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var suffix = fileStem.Substring(videoStem.Length);
+        if (suffix.Length == 0)
+        {
+            return false;
+        }
+
+        var tokens = suffix.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+        return tokens.Any(t => string.Equals(t, languageCode, StringComparison.OrdinalIgnoreCase));
     }
 
     private static string? TryExtractEmbeddedTextSubtitle(string videoFile, PluginOptions options, bool debugEnabled)
