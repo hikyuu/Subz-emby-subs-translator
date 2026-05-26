@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -21,14 +22,17 @@ public sealed class TranslationExecutionEngine
             throw new InvalidOperationException($"No video files found for target: {target}");
         }
 
+        var scanDirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var videoFile in files)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await ProcessVideoAsync(videoFile, options, cancellationToken).ConfigureAwait(false);
+            await ProcessVideoAsync(videoFile, options, cancellationToken, scanDirs).ConfigureAwait(false);
         }
+
+        FlushRescanNotifications(scanDirs);
     }
 
-    private async Task ProcessVideoAsync(string videoFile, PluginOptions options, CancellationToken cancellationToken)
+    private async Task ProcessVideoAsync(string videoFile, PluginOptions options, CancellationToken cancellationToken, HashSet<string> scanDirs)
     {
         var targetCode = options.GetTargetLanguageCode();
         var debugEnabled = options.EnableDebugLog;
@@ -92,6 +96,8 @@ public sealed class TranslationExecutionEngine
             }
             InMemoryTranslationJobDispatcher.AppendRuntimeLog("Info", $"Output written: {outputPath}");
 
+            CollectScanDirectory(videoFile, scanDirs);
+
             Plugin.LogInfo(
                 "SubZ translation usage | File={0} | PromptTokens={1} | CompletionTokens={2} | TotalTokens={3} | CueCount={4}",
                 videoFile,
@@ -106,6 +112,35 @@ public sealed class TranslationExecutionEngine
         finally
         {
             SubtitleSourceResolver.CleanupTemp(source);
+        }
+    }
+
+    private static void CollectScanDirectory(string videoFile, HashSet<string> scanDirs)
+    {
+        var dir = Path.GetDirectoryName(videoFile);
+        if (!string.IsNullOrWhiteSpace(dir))
+        {
+            scanDirs.Add(dir);
+        }
+    }
+
+    private static void FlushRescanNotifications(HashSet<string> scanDirs)
+    {
+        var monitor = Plugin.LibraryMonitor;
+        if (monitor == null) return;
+        if (scanDirs.Count == 0) return;
+
+        foreach (var dir in scanDirs)
+        {
+            try
+            {
+                monitor.ReportFileSystemChanged(dir);
+                InMemoryTranslationJobDispatcher.AppendRuntimeLog("Info", $"Submitted folder for Emby rescan: {dir}");
+            }
+            catch (Exception ex)
+            {
+                InMemoryTranslationJobDispatcher.AppendRuntimeLog("Warn", $"Emby rescan failed for {dir}: {ex.Message}");
+            }
         }
     }
 }

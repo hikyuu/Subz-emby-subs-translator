@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using MediaBrowser.Common;
 using MediaBrowser.Common.Plugins;
+using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Model.Drawing;
 using MediaBrowser.Model.Logging;
@@ -19,6 +20,7 @@ public sealed class Plugin : BasePluginSimpleUI<PluginOptions>, IHasThumbImage, 
 {
     private const string PreferredLinuxLogBaseDir = "/config/plugins/SubZ.Plugin";
     public static Plugin? Instance { get; private set; }
+    public static ILibraryMonitor? LibraryMonitor { get; private set; }
     private static ILogger? _logger;
     private readonly IFfmpegToolPathProvider _ffmpegToolPathProvider;
 
@@ -28,6 +30,7 @@ public sealed class Plugin : BasePluginSimpleUI<PluginOptions>, IHasThumbImage, 
         Instance = this;
         _ffmpegToolPathProvider = new ApplicationHostFfmpegToolPathProvider(applicationHost);
         TryInitLogger(applicationHost);
+        TryInitLibraryMonitor(applicationHost);
         var options = CurrentOptions;
         ConfigureRuntimeFileLogger(options);
         InMemoryTranslationJobDispatcher.AppendRuntimeLog("Info", "SubZ plugin started.");
@@ -280,6 +283,18 @@ public sealed class Plugin : BasePluginSimpleUI<PluginOptions>, IHasThumbImage, 
         catch
         {
             _logger = null;
+        }
+    }
+
+    private static void TryInitLibraryMonitor(IApplicationHost applicationHost)
+    {
+        try
+        {
+            LibraryMonitor = applicationHost.Resolve<ILibraryMonitor>();
+        }
+        catch
+        {
+            LibraryMonitor = null;
         }
     }
 
