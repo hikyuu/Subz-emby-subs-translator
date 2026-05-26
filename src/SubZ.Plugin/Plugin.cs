@@ -20,16 +20,18 @@ public sealed class Plugin : BasePluginSimpleUI<PluginOptions>, IHasThumbImage, 
     private const string PreferredLinuxLogBaseDir = "/config/plugins/SubZ.Plugin";
     public static Plugin? Instance { get; private set; }
     private static ILogger? _logger;
+    private readonly IFfmpegToolPathProvider _ffmpegToolPathProvider;
 
     public Plugin(IApplicationHost applicationHost)
         : base(applicationHost)
     {
         Instance = this;
+        _ffmpegToolPathProvider = new ApplicationHostFfmpegToolPathProvider(applicationHost);
         TryInitLogger(applicationHost);
         var options = CurrentOptions;
         ConfigureRuntimeFileLogger(options);
         InMemoryTranslationJobDispatcher.AppendRuntimeLog("Info", "SubZ plugin started.");
-        ValidateMediaToolPaths(options);
+        ScheduleMediaToolPathValidation();
     }
 
     public override string Name => "SubZ";
@@ -151,16 +153,6 @@ public sealed class Plugin : BasePluginSimpleUI<PluginOptions>, IHasThumbImage, 
         }
         options.PreferredSourceLanguageOption = SourceLanguageMap.FromCode(options.PreferredSourceLanguage);
 
-        if (string.IsNullOrWhiteSpace(options.FfmpegPath))
-        {
-            options.FfmpegPath = "/bin/ffmpeg";
-        }
-
-        if (string.IsNullOrWhiteSpace(options.FfprobePath))
-        {
-            options.FfprobePath = "/bin/ffprobe";
-        }
-
         if (options.LogFileMaxSizeMb <= 0)
         {
             options.LogFileMaxSizeMb = 10;
@@ -224,8 +216,8 @@ public sealed class Plugin : BasePluginSimpleUI<PluginOptions>, IHasThumbImage, 
         options.Model = profile.Model;
         options.BatchSize = profile.BatchSize;
         options.PreferredSourceLanguage = SourceLanguageMap.ToCode(options.PreferredSourceLanguageOption);
-        options.FfmpegPath = string.IsNullOrWhiteSpace(options.FfmpegPath) ? "/bin/ffmpeg" : options.FfmpegPath.Trim();
-        options.FfprobePath = string.IsNullOrWhiteSpace(options.FfprobePath) ? "/bin/ffprobe" : options.FfprobePath.Trim();
+        options.FfmpegPath = (options.FfmpegPath ?? string.Empty).Trim();
+        options.FfprobePath = (options.FfprobePath ?? string.Empty).Trim();
 
         options.LogFileMaxSizeMb = options.LogFileMaxSizeMb <= 0 ? 10 : options.LogFileMaxSizeMb;
         options.LogRetentionDays = options.LogRetentionDays <= 0 ? 7 : options.LogRetentionDays;
@@ -259,6 +251,23 @@ public sealed class Plugin : BasePluginSimpleUI<PluginOptions>, IHasThumbImage, 
         }
 
         return base.OnOptionsSaving(options);
+    }
+
+    private void ScheduleMediaToolPathValidation()
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
+                ValidateMediaToolPaths(CurrentOptions);
+            }
+            catch (Exception ex)
+            {
+                InMemoryTranslationJobDispatcher.AppendRuntimeLog("Warn", $"Delayed media tool path validation failed: {ex.Message}");
+                LogWarn("Delayed media tool path validation failed: {0}", ex.Message);
+            }
+        });
     }
 
     private static void TryInitLogger(IApplicationHost applicationHost)
@@ -341,11 +350,17 @@ public sealed class Plugin : BasePluginSimpleUI<PluginOptions>, IHasThumbImage, 
 
     private static void ValidateMediaToolPaths(PluginOptions options)
     {
-        ValidateToolPath("ffmpeg", options.FfmpegPath);
-        ValidateToolPath("ffprobe", options.FfprobePath);
+        var paths = ResolveFfmpegToolPaths(options);
+        ValidateToolPath("ffmpeg", paths.FfmpegPath, paths.FfmpegSource);
+        ValidateToolPath("ffprobe", paths.FfprobePath, paths.FfprobeSource);
     }
 
-    private static void ValidateToolPath(string toolName, string? configuredPath)
+    public static FfmpegToolPaths ResolveFfmpegToolPaths(PluginOptions options)
+    {
+        return FfmpegToolPathResolver.Resolve(options, Instance?._ffmpegToolPathProvider);
+    }
+
+    private static void ValidateToolPath(string toolName, string? configuredPath, string source)
     {
         var path = (configuredPath ?? string.Empty).Trim();
         if (path.Length == 0)
@@ -358,12 +373,12 @@ public sealed class Plugin : BasePluginSimpleUI<PluginOptions>, IHasThumbImage, 
 
         if (!File.Exists(path))
         {
-            var msg = $"{toolName} path not found: {path}";
+            var msg = $"{toolName} path not found ({source}): {path}";
             LogWarn(msg);
             InMemoryTranslationJobDispatcher.AppendRuntimeLog("Warn", msg);
             return;
         }
 
-        InMemoryTranslationJobDispatcher.AppendRuntimeLog("Info", $"{toolName} path OK: {path}");
+        InMemoryTranslationJobDispatcher.AppendRuntimeLog("Info", $"{toolName} path OK ({source}): {path}");
     }
 }

@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="MediaBrowser.Server.Core" Version="4.9.1.90" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
@@ -22,6 +23,13 @@
 
   <ItemGroup>
     <None Include="..\..\src\SubZ.Plugin\Plugin.cs" Link="Plugin.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="..\..\src\SubZ.Plugin\Configuration\LanguageCodeMap.cs" Link="LanguageCodeMap.cs" />
+    <Compile Include="..\..\src\SubZ.Plugin\Configuration\OutputFormatOption.cs" Link="OutputFormatOption.cs" />
+    <Compile Include="..\..\src\SubZ.Plugin\Configuration\PluginOptions.cs" Link="PluginOptions.cs" />
+    <Compile Include="..\..\src\SubZ.Plugin\Configuration\SourceLanguageOption.cs" Link="SourceLanguageOption.cs" />
+    <Compile Include="..\..\src\SubZ.Plugin\Configuration\SupportedLanguageOption.cs" Link="SupportedLanguageOption.cs" />
+    <Compile Include="..\..\src\SubZ.Plugin\Configuration\TranslationApiProfile.cs" Link="TranslationApiProfile.cs" />
+    <Compile Include="..\..\src\SubZ.Plugin\Services\FfmpegToolPathResolver.cs" Link="FfmpegToolPathResolver.cs" />
     <Compile Include="..\..\src\SubZ.Plugin\Services\TokenUsageLogParser.cs" Link="TokenUsageLogParser.cs" />
   </ItemGroup>
 

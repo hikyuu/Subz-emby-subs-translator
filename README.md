@@ -115,8 +115,8 @@ Notes:
 | LLM | `Model` | Model ID used in request payload. Default: `deepseek-v4-flash`. |
 | LLM | `BatchSize` | Subtitle cues per request. Default: `120`. Higher values improve speed but raise timeout/misalignment risk. |
 | LLM | `PreferredSourceLanguage` | Dropdown option for preferred source language. Default: `en`. Used for external subtitle matching and embedded track preference; falls back to any available subtitle. |
-| Media Tools | `FfmpegPath` | Subtitle extraction executable path. Default: `/bin/ffmpeg`. |
-| Media Tools | `FfprobePath` | Subtitle probing executable path. Default: `/bin/ffprobe`. |
+| Media Tools | `FfmpegPath` | Subtitle extraction executable path. Leave empty to prefer Emby's built-in path, then fallback to `/bin/ffmpeg`. |
+| Media Tools | `FfprobePath` | Subtitle probing executable path. Leave empty to prefer Emby's built-in path, then fallback to `/bin/ffprobe`. |
 | Logging & Status | `LogFileMaxSizeMb` | Runtime log rolling size limit. Default: `10`. |
 | Logging & Status | `LogRetentionDays` | Runtime log retention. Default: `7`. |
 | Logging & Status | `DebugLogMode` | Verbose diagnostics (full request/response body and ffprobe/ffmpeg details). Default: `false`. |
@@ -306,8 +306,8 @@ SubZ 当前会扫描并处理以下视频扩展名：
 | 模型接口 | `模型` | 请求中的模型标识。默认：`deepseek-v4-flash`。 |
 | 模型接口 | `每批字幕条数` | 单次请求包含字幕条数。默认：`120`。值越大吞吐越高，但超时/错位风险也更高。 |
 | 模型接口 | `源语言偏好` | 外挂字幕优先匹配语言代码。默认：`en`。未命中时回退到任意可用字幕。 |
-| 媒体工具 | `FFmpeg 路径` | 抽取封装字幕用的可执行路径。默认：`/bin/ffmpeg`。 |
-| 媒体工具 | `FFprobe 路径` | 探测字幕轨信息用的可执行路径。默认：`/bin/ffprobe`。 |
+| 媒体工具 | `FFmpeg 路径` | 抽取封装字幕用的可执行路径。留空时优先使用 Emby 内置路径，最后兜底 `/bin/ffmpeg`。 |
+| 媒体工具 | `FFprobe 路径` | 探测字幕轨信息用的可执行路径。留空时优先使用 Emby 内置路径，最后兜底 `/bin/ffprobe`。 |
 | 日志与状态 | `日志文件最大大小(MB)` | 单个运行日志滚动上限。默认：`10`。 |
 | 日志与状态 | `日志保留天数` | 运行日志保留天数。默认：`7`。 |
 | 日志与状态 | `详细日志模式(Debug)` | 记录完整请求/响应正文及 ffprobe/ffmpeg 细节。默认：`false`。 |

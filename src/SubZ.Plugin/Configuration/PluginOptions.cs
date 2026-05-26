@@ -77,12 +77,12 @@ public sealed class PluginOptions : EditableOptionsBase
     public string PreferredSourceLanguage { get; set; } = "en";
 
     [DisplayName("FFmpeg 路径 / FFmpeg Path")]
-    [Description("用于抽取封装字幕轨的 ffmpeg 可执行文件路径。 / Path to ffmpeg executable for embedded subtitle extraction.")]
-    public string FfmpegPath { get; set; } = "/bin/ffmpeg";
+    [Description("用于抽取封装字幕轨的 ffmpeg 可执行文件路径。留空则使用 Emby 内置路径。 / Path to ffmpeg executable for embedded subtitle extraction. Leave empty to use Emby's built-in path.")]
+    public string FfmpegPath { get; set; } = string.Empty;
 
     [DisplayName("FFprobe 路径 / FFprobe Path")]
-    [Description("用于探测封装字幕轨信息的 ffprobe 可执行文件路径。 / Path to ffprobe executable for subtitle stream probing.")]
-    public string FfprobePath { get; set; } = "/bin/ffprobe";
+    [Description("用于探测封装字幕轨信息的 ffprobe 可执行文件路径。留空则使用 Emby 内置路径。 / Path to ffprobe executable for subtitle stream probing. Leave empty to use Emby's built-in path.")]
+    public string FfprobePath { get; set; } = string.Empty;
 
     [DisplayName("日志文件最大大小(MB) / Log File Max Size (MB)")]
     [Description("单个日志文件的最大大小（MB）。超过后自动滚动。 / Maximum size per log file in MB before auto-rotation.")]

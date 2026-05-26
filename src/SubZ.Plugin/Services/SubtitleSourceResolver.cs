@@ -122,7 +122,8 @@ public static class SubtitleSourceResolver
 
     private static string? TryExtractEmbeddedTextSubtitle(string videoFile, PluginOptions options, bool debugEnabled)
     {
-        var streams = ProbeSubtitleStreams(videoFile, options, debugEnabled);
+        var toolPaths = global::SubZ.Plugin.Plugin.ResolveFfmpegToolPaths(options);
+        var streams = ProbeSubtitleStreams(videoFile, options, debugEnabled, toolPaths);
         var chosen = TrackSelector.SelectBest(streams, options);
         if (chosen == null)
         {
@@ -134,7 +135,7 @@ public static class SubtitleSourceResolver
         }
 
         var temp = Path.Combine(Path.GetTempPath(), "subz_" + Guid.NewGuid().ToString("N") + ".srt");
-        var ffmpegPath = GetToolPath(options.FfmpegPath, "/bin/ffmpeg");
+        var ffmpegPath = toolPaths.FfmpegPath;
         var args = string.Join(
             " ",
             "-y",
@@ -145,7 +146,7 @@ public static class SubtitleSourceResolver
 
         if (debugEnabled)
         {
-            InMemoryTranslationJobDispatcher.AppendRuntimeLog("Debug", $"Run ffmpeg: {ffmpegPath} {args}");
+            InMemoryTranslationJobDispatcher.AppendRuntimeLog("Debug", $"Run ffmpeg ({toolPaths.FfmpegSource}): {ffmpegPath} {args}");
         }
 
         var code = RunProcess(ffmpegPath, args, out var err);
@@ -166,9 +167,9 @@ public static class SubtitleSourceResolver
         return temp;
     }
 
-    private static List<SubtitleTrackInfo> ProbeSubtitleStreams(string videoFile, PluginOptions options, bool debugEnabled)
+    private static List<SubtitleTrackInfo> ProbeSubtitleStreams(string videoFile, PluginOptions options, bool debugEnabled, FfmpegToolPaths toolPaths)
     {
-        var ffprobePath = GetToolPath(options.FfprobePath, "/bin/ffprobe");
+        var ffprobePath = toolPaths.FfprobePath;
         var args = string.Join(
             " ",
             "-v", "error",
@@ -179,7 +180,7 @@ public static class SubtitleSourceResolver
 
         if (debugEnabled)
         {
-            InMemoryTranslationJobDispatcher.AppendRuntimeLog("Debug", $"Run ffprobe: {ffprobePath} {args}");
+            InMemoryTranslationJobDispatcher.AppendRuntimeLog("Debug", $"Run ffprobe ({toolPaths.FfprobeSource}): {ffprobePath} {args}");
         }
 
         var code = RunProcess(ffprobePath, args, out var output);
@@ -314,12 +315,6 @@ public static class SubtitleSourceResolver
     }
 
     private static string NormalizeLanguageCode(string? configured, string fallback)
-    {
-        var raw = (configured ?? string.Empty).Trim();
-        return string.IsNullOrWhiteSpace(raw) ? fallback : raw;
-    }
-
-    private static string GetToolPath(string? configured, string fallback)
     {
         var raw = (configured ?? string.Empty).Trim();
         return string.IsNullOrWhiteSpace(raw) ? fallback : raw;
