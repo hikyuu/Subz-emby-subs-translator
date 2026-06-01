@@ -46,6 +46,13 @@ public static class SubtitleSourceResolver
         { "por", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "por", "pt", "pt-br" } },
         { "rus", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "rus", "ru" } },
         { "spa", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "spa", "es" } },
+        { "kor", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "kor", "ko" } },
+        { "ara", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "ara", "ar" } },
+        { "tha", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "tha", "th" } },
+        { "vie", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "vie", "vi" } },
+        { "ind", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "ind", "id" } },
+        { "tur", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "tur", "tr" } },
+        { "may", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "may", "ms" } },
     };
 
     // Checks whether the video's embedded subtitles contain any of the skipped languages.

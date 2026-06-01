@@ -14,18 +14,25 @@ public static class LanguageSelectOptionProvider
     {
         var list = new List<EditorSelectOption>
         {
-            new() { Name = "English", Value = "eng" },
             new() { Name = "中文（简体）", Value = "chi" },
             new() { Name = "中文（繁體·台灣）", Value = "zh-tw" },
             new() { Name = "中文（繁體·香港）", Value = "zh-hk" },
-            new() { Name = "Deutsch", Value = "ger" },
+            new() { Name = "English", Value = "eng" },
             new() { Name = "日本語", Value = "jpn" },
-            new() { Name = "हिन्दी", Value = "hin" },
+            new() { Name = "한국어", Value = "kor" },
             new() { Name = "Français", Value = "fre" },
-            new() { Name = "Italiano", Value = "ita" },
+            new() { Name = "Deutsch", Value = "ger" },
+            new() { Name = "Español", Value = "spa" },
             new() { Name = "Português", Value = "por" },
             new() { Name = "Русский", Value = "rus" },
-            new() { Name = "Español", Value = "spa" },
+            new() { Name = "Italiano", Value = "ita" },
+            new() { Name = "العربية", Value = "ara" },
+            new() { Name = "हिन्दी", Value = "hin" },
+            new() { Name = "ภาษาไทย", Value = "tha" },
+            new() { Name = "Tiếng Việt", Value = "vie" },
+            new() { Name = "Bahasa Indonesia", Value = "ind" },
+            new() { Name = "Türkçe", Value = "tur" },
+            new() { Name = "Malay", Value = "may" },
         };
 
         return list;
