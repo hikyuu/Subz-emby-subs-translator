@@ -30,31 +30,6 @@ public static class SubtitleSourceResolver
         "subrip", "srt", "ass", "ssa", "webvtt", "mov_text"
     };
 
-    // ffprobe language tag lookup table:
-    // Key = user-configured Value, Value = set of possible ffprobe output variants for that language
-    private static readonly Dictionary<string, HashSet<string>> FfprobeLanguageLookup = new(StringComparer.OrdinalIgnoreCase)
-    {
-        { "chi", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "chi", "zho", "zh", "zh-cn", "zh-hans" } },
-        { "zh-tw", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "zh-tw", "zh-hant", "chi" } }, // Many MKV files also tag Traditional Chinese as chi
-        { "zh-hk", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "zh-hk", "zh-hant", "chi" } }, // Many MKV files also tag Traditional Chinese as chi
-        { "eng", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "eng", "en" } },
-        { "ger", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "ger", "deu", "de" } },
-        { "jpn", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "jpn", "ja" } },
-        { "hin", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "hin", "hi" } },
-        { "fre", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "fre", "fra", "fr" } },
-        { "ita", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "ita", "it" } },
-        { "por", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "por", "pt", "pt-br" } },
-        { "rus", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "rus", "ru" } },
-        { "spa", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "spa", "es" } },
-        { "kor", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "kor", "ko" } },
-        { "ara", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "ara", "ar" } },
-        { "tha", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "tha", "th" } },
-        { "vie", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "vie", "vi" } },
-        { "ind", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "ind", "id" } },
-        { "tur", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "tur", "tr" } },
-        { "may", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "may", "ms" } },
-    };
-
     // Checks whether the video's embedded subtitles contain any of the skipped languages.
     // Returns true if an embedded subtitle track's language code matches the configured skip list.
     // The matching logic covers various ffprobe output formats: ISO 639-2/B, ISO 639-2/T, ISO 639-1, BCP 47.
@@ -74,7 +49,7 @@ public static class SubtitleSourceResolver
             skipVariants.Add(cfg);
 
             // Look up all variants from the lookup table
-            if (FfprobeLanguageLookup.TryGetValue(cfg, out var variants))
+            if (LanguageSelectOptionProvider.FfprobeLanguageLookup.TryGetValue(cfg, out var variants))
             {
                 skipVariants.UnionWith(variants);
             }
@@ -114,7 +89,7 @@ public static class SubtitleSourceResolver
     // Attempt to map a language code in any format back to ISO 639-2/B three-letter code (reverse lookup).
     private static string GetIso6392B(string lang)
     {
-        foreach (var kvp in FfprobeLanguageLookup)
+        foreach (var kvp in LanguageSelectOptionProvider.FfprobeLanguageLookup)
         {
             if (kvp.Value.Contains(lang))
             {
