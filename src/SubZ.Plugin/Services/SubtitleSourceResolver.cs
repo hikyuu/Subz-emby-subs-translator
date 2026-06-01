@@ -30,6 +30,112 @@ public static class SubtitleSourceResolver
         "subrip", "srt", "ass", "ssa", "webvtt", "mov_text"
     };
 
+    // ffprobe language tag lookup table:
+    // Key = user-configured Value, Value = set of possible ffprobe output variants for that language
+    private static readonly Dictionary<string, HashSet<string>> FfprobeLanguageLookup = new(StringComparer.OrdinalIgnoreCase)
+    {
+        { "chi", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "chi", "zho", "zh", "zh-cn", "zh-hans" } },
+        { "zh-tw", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "zh-tw", "zh-hant", "chi" } }, // Many MKV files also tag Traditional Chinese as chi
+        { "zh-hk", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "zh-hk", "zh-hant", "chi" } }, // Many MKV files also tag Traditional Chinese as chi
+        { "eng", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "eng", "en" } },
+        { "ger", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "ger", "deu", "de" } },
+        { "jpn", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "jpn", "ja" } },
+        { "hin", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "hin", "hi" } },
+        { "fre", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "fre", "fra", "fr" } },
+        { "ita", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "ita", "it" } },
+        { "por", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "por", "pt", "pt-br" } },
+        { "rus", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "rus", "ru" } },
+        { "spa", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "spa", "es" } },
+    };
+
+    // Checks whether the video's embedded subtitles contain any of the skipped languages.
+    // Returns true if an embedded subtitle track's language code matches the configured skip list.
+    // The matching logic covers various ffprobe output formats: ISO 639-2/B, ISO 639-2/T, ISO 639-1, BCP 47.
+    public static bool ShouldSkipEmbeddedByLanguage(string videoFile, PluginOptions options, bool debugEnabled)
+    {
+        var skipConfigValues = ParseSkipConfigValues(options.SkipEmbeddedLanguageCodes);
+        if (skipConfigValues.Count == 0)
+        {
+            return false;
+        }
+
+        // Expand configured Values (ISO 639-2/B) into all possible ffprobe variants
+        var skipVariants = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var cfg in skipConfigValues)
+        {
+            // Exact match: the configured value itself
+            skipVariants.Add(cfg);
+
+            // Look up all variants from the lookup table
+            if (FfprobeLanguageLookup.TryGetValue(cfg, out var variants))
+            {
+                skipVariants.UnionWith(variants);
+            }
+        }
+
+        var toolPaths = global::SubZ.Plugin.Plugin.ResolveFfmpegToolPaths(options);
+        var streams = ProbeSubtitleStreams(videoFile, options, debugEnabled, toolPaths);
+        foreach (var track in streams)
+        {
+            if (!track.IsTextTrack)
+            {
+                continue;
+            }
+
+            var lang = (track.Language ?? string.Empty).Trim().ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(lang))
+            {
+                continue;
+            }
+
+            if (skipVariants.Contains(lang) ||
+                skipVariants.Contains(lang.Split('-')[0]) ||
+                skipVariants.Contains(GetIso6392B(lang)))
+            {
+                if (debugEnabled)
+                {
+                    InMemoryTranslationJobDispatcher.AppendRuntimeLog(
+                        "Info", $"Skip by embedded language: {videoFile} has track #{track.Id} lang={lang}");
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Attempt to map a language code in any format back to ISO 639-2/B three-letter code (reverse lookup).
+    private static string GetIso6392B(string lang)
+    {
+        foreach (var kvp in FfprobeLanguageLookup)
+        {
+            if (kvp.Value.Contains(lang))
+            {
+                return kvp.Key;
+            }
+        }
+        return lang;
+    }
+
+    private static HashSet<string> ParseSkipConfigValues(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        var codes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var part in raw!.Split(new[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries))
+        {
+            var trimmed = part?.Trim().ToLowerInvariant() ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(trimmed))
+            {
+                codes.Add(trimmed);
+            }
+        }
+        return codes;
+    }
+
     public static SubtitleSourceResolution Resolve(string videoFile, PluginOptions options, bool debugEnabled)
     {
         var external = FindSourceSubtitle(videoFile, options);

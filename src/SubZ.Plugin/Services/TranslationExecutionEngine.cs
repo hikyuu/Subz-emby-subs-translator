@@ -44,9 +44,9 @@ public sealed class TranslationExecutionEngine
             return;
         }
 
-        if (SubtitleSourceResolver.HasEmbeddedTargetSubtitle(videoFile, options, debugEnabled))
+        if (SubtitleSourceResolver.ShouldSkipEmbeddedByLanguage(videoFile, options, debugEnabled))
         {
-            InMemoryTranslationJobDispatcher.AppendRuntimeLog("Info", $"Skip existing embedded target subtitle: {videoFile} -> {targetCode}");
+            InMemoryTranslationJobDispatcher.AppendRuntimeLog("Info", $"Skip by embedded language: {videoFile} has an embedded subtitle track matching skipped languages");
             return;
         }
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using Emby.Web.GenericEdit;
+using Emby.Web.GenericEdit.Common;
 using MediaBrowser.Model.Attributes;
 
 namespace SubZ.Plugin.Configuration;
@@ -135,6 +136,26 @@ public sealed class PluginOptions : EditableOptionsBase
 
     [DisplayName("优先文本字幕轨 / Prefer Text Subtitle Track")]
     public bool PreferTextSubtitleTrack { get; set; } = true;
+
+    [Browsable(false)]
+    public IEnumerable<Emby.Web.GenericEdit.Common.EditorSelectOption> SkipLanguageCodesList { get; set; }
+        = LanguageSelectOptionProvider.GetOptions();
+
+    [DisplayName("跳过的内嵌字幕语言 / Skip Embedded Subtitle Languages")]
+    [Description("勾选的语言：若视频内嵌字幕中包含该语言的字幕轨，则跳过翻译。空表示不跳过任何内嵌字幕。 / If the video has an embedded subtitle track matching any checked language, translation will be skipped.")]
+    [EditMultilSelect]
+    [SelectItemsSource(nameof(SkipLanguageCodesList))]
+    public string SkipEmbeddedLanguageCodes { get; set; } = string.Empty;
+
+    [Browsable(false)]
+    public IEnumerable<EditorSelectOption> LibrarySelectItemsList { get; set; }
+        = new List<EditorSelectOption>();
+
+    [DisplayName("翻译的媒体库 / Libraries to Translate")]
+    [Description("仅翻译勾选的媒体库。空表示翻译所有媒体库。 / Only translate media in selected libraries. Leave empty to translate all libraries.")]
+    [EditMultilSelect]
+    [SelectItemsSource(nameof(LibrarySelectItemsList))]
+    public string SelectedLibraryIds { get; set; } = string.Empty;
 
     public string GetTargetLanguageCode()
     {
