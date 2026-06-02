@@ -18,6 +18,11 @@ public sealed class SubtitleTrackInfo
 
 public sealed class SubtitleTrackSelector
 {
+    private static readonly HashSet<string> TextSubtitleCodecs = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "subrip", "srt", "ass", "ssa", "webvtt", "mov_text"
+    };
+
     public SubtitleTrackInfo? SelectBest(IReadOnlyList<SubtitleTrackInfo> tracks, PluginOptions options)
     {
         if (tracks is null || tracks.Count == 0)
@@ -29,6 +34,17 @@ public sealed class SubtitleTrackSelector
             .OrderByDescending(t => Score(t, options))
             .ThenBy(t => t.Id)
             .FirstOrDefault();
+    }
+
+    public static bool HasTargetTrack(IReadOnlyList<SubtitleTrackInfo> tracks, PluginOptions options)
+    {
+        if (tracks is null || tracks.Count == 0)
+        {
+            return false;
+        }
+
+        var targetCode = NormalizeLanguageCode(options.GetTargetLanguageCode(), "zh-CN");
+        return tracks.Any(t => IsLanguageMatch(t.Language, targetCode));
     }
 
     private static int Score(SubtitleTrackInfo track, PluginOptions options)
@@ -83,7 +99,7 @@ public sealed class SubtitleTrackSelector
         }
 
         var codec = track.Codec?.Trim().ToLowerInvariant() ?? string.Empty;
-        if (codec == "subrip" || codec == "srt" || codec == "ass" || codec == "ssa" || codec == "webvtt")
+        if (TextSubtitleCodecs.Contains(codec))
         {
             score += 30;
         }
@@ -94,6 +110,52 @@ public sealed class SubtitleTrackSelector
         }
 
         return score;
+    }
+
+    private static bool IsLanguageMatch(string? language, string targetCode)
+    {
+        var normalizedLanguage = NormalizeLanguageToken(language);
+        var normalizedTarget = NormalizeLanguageToken(targetCode);
+        if (string.IsNullOrWhiteSpace(normalizedLanguage) || string.IsNullOrWhiteSpace(normalizedTarget))
+        {
+            return false;
+        }
+
+        if (string.Equals(normalizedLanguage, normalizedTarget, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (normalizedTarget.StartsWith("zh", StringComparison.OrdinalIgnoreCase))
+        {
+            if (normalizedTarget == "zh-tw" || normalizedTarget == "zh-hant" || normalizedTarget == "zh-hk")
+            {
+                return normalizedLanguage == "zh"
+                    || normalizedLanguage == "zh-tw"
+                    || normalizedLanguage == "zh-hant"
+                    || normalizedLanguage == "zh-hk"
+                    || normalizedLanguage == "chi"
+                    || normalizedLanguage == "zho"
+                    || normalizedLanguage == "cmn";
+            }
+
+            return normalizedLanguage == "zh"
+                || normalizedLanguage == "zh-cn"
+                || normalizedLanguage == "zh-hans"
+                || normalizedLanguage == "zh-sg"
+                || normalizedLanguage == "chi"
+                || normalizedLanguage == "zho"
+                || normalizedLanguage == "cmn";
+        }
+
+        var targetShort = normalizedTarget.Split('-')[0];
+        return string.Equals(normalizedLanguage, targetShort, StringComparison.OrdinalIgnoreCase)
+            || normalizedLanguage.StartsWith(targetShort + "-", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeLanguageToken(string? value)
+    {
+        return (value ?? string.Empty).Trim().Replace('_', '-').ToLowerInvariant();
     }
 
     private static string NormalizeLanguageCode(string? configured, string fallback)

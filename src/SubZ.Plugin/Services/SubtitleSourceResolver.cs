@@ -167,6 +167,13 @@ public static class SubtitleSourceResolver
         return temp;
     }
 
+    public static bool HasEmbeddedTargetSubtitle(string videoFile, PluginOptions options, bool debugEnabled)
+    {
+        var toolPaths = global::SubZ.Plugin.Plugin.ResolveFfmpegToolPaths(options);
+        var streams = ProbeSubtitleStreams(videoFile, options, debugEnabled, toolPaths);
+        return SubtitleTrackSelector.HasTargetTrack(streams, options);
+    }
+
     private static List<SubtitleTrackInfo> ProbeSubtitleStreams(string videoFile, PluginOptions options, bool debugEnabled, FfmpegToolPaths toolPaths)
     {
         var ffprobePath = toolPaths.FfprobePath;

@@ -30,6 +30,7 @@
     <Compile Include="..\..\src\SubZ.Plugin\Configuration\SupportedLanguageOption.cs" Link="SupportedLanguageOption.cs" />
     <Compile Include="..\..\src\SubZ.Plugin\Configuration\TranslationApiProfile.cs" Link="TranslationApiProfile.cs" />
     <Compile Include="..\..\src\SubZ.Plugin\Services\FfmpegToolPathResolver.cs" Link="FfmpegToolPathResolver.cs" />
+    <Compile Include="..\..\src\SubZ.Plugin\Services\SubtitleTrackSelector.cs" Link="SubtitleTrackSelector.cs" />
     <Compile Include="..\..\src\SubZ.Plugin\Services\TokenUsageLogParser.cs" Link="TokenUsageLogParser.cs" />
   </ItemGroup>
 
